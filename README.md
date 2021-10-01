@@ -11,6 +11,15 @@ Navigation is ordered through 4 tabs, scrolling and add/edit/remove buttons as w
 ![image](https://user-images.githubusercontent.com/91484772/135620757-69062fd2-fa18-4985-ade4-5d10ec901646.png)
 
 
+### BORROWS
+To borrow a book to a user the librarian must know the ID of the user and the ID of the book, as well as the time interval for which the user wants to borrow the book. <br>
+Once input the borrow will show up in the table where there will be displayed the expected return date as well as the data about the book and the user. <br>
+If the user is returning a book the librarian can return the book in the RETURN part of the tab using the same data needed for borrowing except the time interval. <br>
+
+
+![image](https://user-images.githubusercontent.com/91484772/135620838-39e1e3ce-468a-495a-8dc5-e679f5b69ee7.png)
+
+
 ### BOOK 
 Books are added depending on ID field; there cannot be 2 books with the same ID. <br>
 Each book can have determined fields such as ID, title, author, edition and genre. <br>
@@ -29,15 +38,6 @@ The editing principle works the same. <br>
 
 
 ![image](https://user-images.githubusercontent.com/91484772/135620911-07124496-eec6-4a0a-91fb-46895653913a.png)
-
-
-### BORROWS
-To borrow a book to a user the librarian must know the ID of the user and the ID of the book, as well as the time interval for which the user wants to borrow the book. <br>
-Once input the borrow will show up in the table where there will be displayed the expected return date as well as the data about the book and the user. <br>
-If the user is returning a book the librarian can return the book in the RETURN part of the tab using the same data needed for borrowing except the time interval. <br>
-
-
-![image](https://user-images.githubusercontent.com/91484772/135620838-39e1e3ce-468a-495a-8dc5-e679f5b69ee7.png)
 
 
 ### LIBRARIAN
