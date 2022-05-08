@@ -50,12 +50,11 @@ After the first input librarian, the default log in credentials(all zeros) are d
 
 ## Getting it up and running
 ### Requirements:
-JRE version 8 or higher (https://java.com/en/download/)  
+JRE version 8 or higher (JDK install recommended) (https://java.com/en/download/)  
 MySQL Server (https://dev.mysql.com/downloads/installer/)  
-MySQL Workbench (https://dev.mysql.com/downloads/installer/)
+<!-- MySQL Workbench (https://dev.mysql.com/downloads/installer/) -->
 
 ### Setup:
 When creating a new server in MySQL Server, all the fields should be left as they are.   
-The root password should be set to "1234" (without the quotes).  
-In MySQL Workbench a new connection should be created with paramters that will allow the program to connect to the database.  
+The root password should be set to "1234" (without the quotes).    
 The program creates a database itself so there is no need for database creation in MySQL Workbench.
