@@ -3,7 +3,7 @@ Library program made with Java and MySQL through JDBC
 
 The program has 4 separate data classes: books, borrows, users and librarians. <br>
 All the aformentioned data is saved in a MySQL database through the JDBC connection with the database. <br>
-Program enables the user to log in as an librarian, in first time usage scenario all the fields are to be filled with 0 in order to log in succesfully. <br>
+The program enables the user to log in as a librarian, in first time usage scenario all the fields are to be filled with 0 in order to log in succesfully. <br>
 When logged in, the librarian has the ability to add users who can borrow books(up to 3 per user), add books and input borrows. <br>
 Navigation is ordered through 4 tabs, scrolling and add/edit/remove buttons as well as tables that show the current status of the database. <br>
 
@@ -13,7 +13,7 @@ Navigation is ordered through 4 tabs, scrolling and add/edit/remove buttons as w
 
 ### BORROWS
 To borrow a book to a user the librarian must know the ID of the user and the ID of the book, as well as the time interval for which the user wants to borrow the book. <br>
-Once input the borrow will show up in the table where there will be displayed the expected return date as well as the data about the book and the user. <br>
+Once input, the borrow will show up in the table where the expected return date as well as the data about the book and the user will be displayed. <br>
 If the user is returning a book the librarian can return the book in the RETURN part of the tab using the same data needed for borrowing except the time interval. <br>
 
 
@@ -48,3 +48,14 @@ After the first input librarian, the default log in credentials(all zeros) are d
 ![image](https://user-images.githubusercontent.com/91484772/135621189-c914ee64-6fcf-48ae-80a5-72d22e4218fa.png)
 
 
+## Getting it up and running
+### Requirements:
+JRE version 8 or higher (https://java.com/en/download/)  
+MySQL Server (https://dev.mysql.com/downloads/installer/)  
+MySQL Workbench (https://dev.mysql.com/downloads/installer/)
+
+### Setup:
+When creating a new server in MySQL Server, all the fields should be left as they are.   
+The root password should be set to "1234" (without the quotes).  
+In MySQL Workbench a new connection should be created with paramters that will allow the program to connect to the database.  
+The program creates a database itself so there is no need for database creation in MySQL Workbench.
