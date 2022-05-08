@@ -58,3 +58,5 @@ MySQL Server (https://dev.mysql.com/downloads/installer/)
 When creating a new server in MySQL Server, all the fields should be left as they are.   
 The root password should be set to "1234" (without the quotes).    
 The program creates a database itself so there is no need for database creation in MySQL Workbench.
+Build path should be adjusted.
+JDBC .jar file should be set in the "external libraries" option.
