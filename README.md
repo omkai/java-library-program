@@ -5,7 +5,7 @@ The program has 4 separate data classes: books, borrows, users and librarians. <
 All the aformentioned data is saved in a MySQL database through the JDBC connection with the database. <br>
 The program enables the user to log in as a librarian, in first time usage scenario all the fields are to be filled with 0 in order to log in succesfully. <br>
 When logged in, the librarian has the ability to add users who can borrow books(up to 3 per user), add books and input borrows. <br>
-Navigation is ordered through 4 tabs, scrolling and add/edit/remove buttons as well as tables that show the current status of the database. <br>
+Navigation is ordered through 4 tabs, scrolling and add/edit buttons as well as tables that show the current status of the database. <br>
 
 
 ![image](https://user-images.githubusercontent.com/91484772/135620757-69062fd2-fa18-4985-ade4-5d10ec901646.png)
