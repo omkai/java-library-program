@@ -4,7 +4,7 @@ import java.lang.reflect.InvocationTargetException;
 
 import javax.swing.SwingUtilities;
 
-import hr.library.GUI.MainGUI.PasswordWindow;
+import hr.library.gui.MainGUI.PasswordWindow;
 import hr.library.database.Database;
 import hr.library.librarians.Librarian;
 

@@ -1,5 +1,7 @@
 package hr.library.book;
 
+import java.util.Objects;
+
 public class Book {
 
 	private String name;
@@ -108,17 +110,14 @@ public class Book {
 				return false;
 		} else if (!author.equals(other.author))
 			return false;
-		if ((int)edition != (int)other.edition)
+		if (edition != (int)other.edition)
 			return false;
 		if (genre != other.genre)
 			return false;
-		if (id != other.id)
+		if (!Objects.equals(id, other.id))
 			return false;
 		if (name == null) {
-			if (other.name != null)
-				return false;
-		} else if (!name.equals(other.name))
-			return false;
-		return true;
+			return other.name == null;
+		} else return name.equals(other.name);
 	}
 }

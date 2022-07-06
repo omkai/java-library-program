@@ -7,7 +7,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Arrays;
 
-import hr.library.Borrowings.Borrowings;
+import hr.library.borrow.Borrow;
 import hr.library.book.Book;
 import hr.library.book.Genre;
 import hr.library.librarians.Librarian;
@@ -21,6 +21,7 @@ public class Database {
 		try {
 			//			Class.forName("com.mysql.cj.jdbc.Driver"); not needed
 			Connection c = null;
+			Class.forName("com.mysql.cj.jdbc.Driver");
 			c = DriverManager.getConnection("jdbc:mysql://localhost/" + db, "root", "1234");
 			System.out.println("Connected");
 			return c;
@@ -496,7 +497,7 @@ public class Database {
 	
 	
 	//***BORROW METHODS***//
-	public static void insertBorrow(Borrowings borrow) {
+	public static void insertBorrow(Borrow borrow) {
 
 		int userId = borrow.getUser().getId();
 		int bookId = borrow.getBook().getId();
@@ -523,7 +524,7 @@ public class Database {
 		}
 	}
 
-	public static Borrowings getBorrow(User user, Book book) {
+	public static Borrow getBorrow(User user, Book book) {
 
 		try {
 			Connection con = getConnection("library");
@@ -534,7 +535,7 @@ public class Database {
 			while(result.next()) {
 				if(result.getInt("userId") == user.getId() &&
 						result.getInt("bookId") == book.getId()) {
-					return new Borrowings(user, book, result.getInt("borrowTime"));
+					return new Borrow(user, book, result.getInt("borrowTime"));
 				}
 			}
 			System.out.println("Librarian fetched");
