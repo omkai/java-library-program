@@ -1,18 +1,24 @@
 package hr.library.main;
 
-import java.lang.reflect.InvocationTargetException;
-
-import javax.swing.SwingUtilities;
-
-import hr.library.gui.MainGUI.PasswordWindow;
 import hr.library.database.Database;
+import hr.library.gui.MainGUI.PasswordWindow;
 import hr.library.librarians.Librarian;
 
-public class Main {
+import javax.swing.*;
+import java.lang.reflect.InvocationTargetException;
+
+public class  Main {
+
+	/* TOD0
+	* MAKE THE PREPARED STATEMENT SECURE WITH PARAMETERIZATION
+	* https://www.javatpoint.com/PreparedStatement-interface
+	* CLOSE THE CONNECTIONS ON THE DATABASE methods
+	* */
+
 
 	public static void main(String[] args) {
 		Database.createDatabase();
-		Database.createTables();	
+		Database.createTables();
 		
 		if(Database.countLibrarians() > 1 && Database.getLibrarian(0) != null) {
 			Database.deleteLibrarian(0);

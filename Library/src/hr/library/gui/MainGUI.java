@@ -1,23 +1,12 @@
 package hr.library.gui;
 
-import java.awt.BorderLayout;
-import java.awt.GridLayout;
-import java.awt.Toolkit;
+import hr.library.database.Database;
+import hr.library.librarians.Librarian;
 
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JPasswordField;
-import javax.swing.JTabbedPane;
-import javax.swing.JTextField;
-import javax.swing.UIManager;
-import javax.swing.WindowConstants;
+import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
-
-import hr.library.database.Database;
+import java.awt.*;
 
 public class MainGUI extends JFrame {
 
@@ -35,7 +24,6 @@ public class MainGUI extends JFrame {
 		setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 		setSize((int)(Toolkit.getDefaultToolkit().getScreenSize().width/1.3), (int)(Toolkit.getDefaultToolkit().getScreenSize().height/1.3));
 		setLocationRelativeTo(null); //sets the default window position to the middle of the screen
-		//		setIconImage(); TO-DO set window icon to something desirable
 
 		JTabbedPane t = new JTabbedPane();
 		t.add("Borrows", new BorrowTab());
@@ -46,6 +34,7 @@ public class MainGUI extends JFrame {
 		add(t);
 
 	}
+
 
 	public static class PasswordWindow extends JFrame {
 
@@ -110,9 +99,10 @@ public class MainGUI extends JFrame {
 						if(Tname.getText().length() == 0 || Tsurname.getText().length() == 0 || Tid.getText().length() == 0 || Tpassword.getPassword().length == 0) {
 							JOptionPane.showMessageDialog(PasswordWindow.this, "All fields must be filled");
 						} else if(Database.isLibrarian(Tname.getText().toString(), Tsurname.getText().toString(), Integer.parseInt(Tid.getText().toString()), Tpassword.getPassword()) == true) {
+							Librarian.setCurrentLibrarian(new Librarian(Tname.getText(), Tsurname.getText(), Integer.parseInt(Tid.getText()), Tpassword.getPassword()));
 							MainGUI window = new MainGUI();
 							window.setVisible(true);
-							PasswordWindow.this.dispose();;
+							PasswordWindow.this.dispose();
 						} else
 							JOptionPane.showMessageDialog(PasswordWindow.this, "Wrong user credential(s) or password");
 					}

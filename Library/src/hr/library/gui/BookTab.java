@@ -4,11 +4,6 @@ import hr.library.book.Book;
 import hr.library.book.Genre;
 import hr.library.database.Database;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.GridLayout;
-//import java.util.*;
-
 import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
@@ -16,6 +11,7 @@ import javax.swing.border.EtchedBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableModel;
+import java.awt.*;
 
 
 public class BookTab extends JPanel {
@@ -214,12 +210,12 @@ public class BookTab extends JPanel {
 								book.getGenre());
 
 						updateTable(book);
-						JOptionPane.showMessageDialog(BookTab.this, "Book sucessfully updated");
+						JOptionPane.showMessageDialog(BookTab.this, "Book successfully updated");
 
 					} catch(Exception e) {
 						e.printStackTrace();
 						System.out.println("Book could not be updated");
-						JOptionPane.showMessageDialog(BookTab.this, "Error has occured");
+						JOptionPane.showMessageDialog(BookTab.this, e.getMessage());
 					}
 				}
 			};
@@ -327,12 +323,12 @@ public class BookTab extends JPanel {
 		DefaultTableModel change = (DefaultTableModel)updateTable.getModel();
 
 		for(int i = 0; i < change.getRowCount(); i++) {
-			Book toChange = new Book((String)model.getValueAt(i, 1),
-					(String)model.getValueAt(i, 2),
-					Genre.valueOf((String)model.getValueAt(i, 4)),
-					Integer.parseInt((String)model.getValueAt(i, 3)),
-					Integer.parseInt((String)model.getValueAt(i, 0)),
-					(boolean)Boolean.getBoolean((String)model.getValueAt(i, 5)));
+			Book toChange = new Book(model.getValueAt(i, 1).toString(),
+					model.getValueAt(i, 2).toString(),
+					Genre.valueOf(model.getValueAt(i, 4).toString()),
+					Integer.parseInt((model.getValueAt(i, 3)).toString()),
+					Integer.parseInt(model.getValueAt(i, 0).toString()),
+					Boolean.getBoolean(model.getValueAt(i, 5).toString()));
 			if(book.equals(toChange)) {
 				model.setValueAt(bool , i, 5);
 				break;

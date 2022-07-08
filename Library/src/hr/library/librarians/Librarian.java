@@ -9,6 +9,7 @@ public class Librarian {
 	private int id;
 	private char[] password;
 
+	private static Librarian currentLibrarian = new Librarian("root", "", 00, "1234".toCharArray());
 	public Librarian(String name, String surname, int id, char[] password) {
 		this.name = name;
 		this.surname = surname;
@@ -43,10 +44,13 @@ public class Librarian {
 	public char[] getPassword() {
 		return password;
 	}
-
 	public void setPassword(char[] password) {
 		this.password = password;
 	}
+
+	public static Librarian getCurrentLibrarian() { return currentLibrarian; }
+
+	public static void setCurrentLibrarian(Librarian librarian) { currentLibrarian = librarian; }
 
 	@Override
 	public String toString() {

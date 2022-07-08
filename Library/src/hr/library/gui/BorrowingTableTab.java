@@ -12,7 +12,7 @@ public class BorrowingTableTab extends JPanel {
 
 	private static String[] columns = {"Return date", "User ID", "User name", "User surname", "Book title", "Book author", "Book edition"};
 	
-	private static JTable table = new JTable(Database.fetchBorrowings(), columns);
+	private static JTable table = new JTable(Database.fetchBorrow(), columns);
 	
 	public BorrowingTableTab() {
 		setLayout(new BorderLayout());
@@ -23,7 +23,7 @@ public class BorrowingTableTab extends JPanel {
 	}
 	
 	public static void updateTable() {
-		DefaultTableModel model = new DefaultTableModel(Database.fetchBorrowings(), columns);
+		DefaultTableModel model = new DefaultTableModel(Database.fetchBorrow(), columns);
 		table.setModel(model);
 	}
 }

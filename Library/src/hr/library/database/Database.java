@@ -1,29 +1,26 @@
 package hr.library.database;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.Arrays;
-
-import hr.library.borrow.Borrow;
 import hr.library.book.Book;
 import hr.library.book.Genre;
+import hr.library.borrow.Borrow;
 import hr.library.librarians.Librarian;
 import hr.library.users.User;
+
+import java.sql.*;
+import java.util.Arrays;
 
 public class Database {
 
 	//***CONNECTION ESTABLISHMENT***//
-	public static Connection getConnection(String db) {
+	public static Connection getConnection(String db, String name, char[] password) {
 
 		try {
 			//			Class.forName("com.mysql.cj.jdbc.Driver"); not needed
 			Connection c = null;
 			Class.forName("com.mysql.cj.jdbc.Driver");
-			c = DriverManager.getConnection("jdbc:mysql://localhost/" + db, "root", "1234");
-			System.out.println("Connected");
+			String pass = new String(password);
+			c = DriverManager.getConnection("jdbc:mysql://localhost/" + db, name, new String(password));
+			System.out.println("Connected as librarian: " + name);
 			return c;
 
 		} catch (Exception e) {
@@ -34,7 +31,7 @@ public class Database {
 
 	//Creates database with name library
 	public static void createDatabase() {
-		Connection con = getConnection(""); //-> empty because there is no database yet
+		Connection con = getConnection("", Librarian.getCurrentLibrarian().getName(), Librarian.getCurrentLibrarian().getPassword()); //-> empty because there is no database yet
 
 		try {
 			PreparedStatement createDb = con.prepareStatement("CREATE DATABASE IF NOT EXISTS library");
@@ -49,7 +46,7 @@ public class Database {
 	public static void createTables() {
 
 		try {
-			Connection con = getConnection("library");
+			Connection con = getConnection("library", Librarian.getCurrentLibrarian().getName(), Librarian.getCurrentLibrarian().getPassword());
 
 			PreparedStatement createBooks = con.prepareStatement("CREATE TABLE IF NOT EXISTS books"
 					+ "("
@@ -58,45 +55,49 @@ public class Database {
 					+ " bookAuthor VARCHAR(50),"
 					+ " bookEdition SMALLINT,"
 					+ " bookGenre VARCHAR(255),"
-					+ " bookBorrowed VARCHAR(5), "
-					+ " PRIMARY KEY(bookId))"
+					+ " bookBorrowed VARCHAR(5),"
+					+ " PRIMARY KEY(bookId)"
+					+ " );"
 					);
 			createBooks.executeUpdate();
 			System.out.println("Book table created");
 
 			PreparedStatement createUsers = con.prepareStatement("CREATE TABLE IF NOT EXISTS users"
 					+ "("
-					+ " userId BIGINT NOT NULL, "
-					+ " userName VARCHAR(40), "
-					+ " userSurname VARCHAR(40), "
-					+ " userNoOfBooks TINYINT, "
-					+ " PRIMARY KEY(userId))"
+					+ " userId BIGINT NOT NULL,"
+					+ " userName VARCHAR(40),"
+					+ " userSurname VARCHAR(40),"
+					+ " userNoOfBooks TINYINT,"
+					+ " PRIMARY KEY(userId)"
+					+ " )"
 					);
 			createUsers.executeUpdate();
 			System.out.println("User table created");
 
 			PreparedStatement createLibrarians = con.prepareStatement("CREATE TABLE IF NOT EXISTS librarians"
 					+ "("
-					+ " librarianId BIGINT NOT NULL, "
-					+ " librarianName VARCHAR(40), "
-					+ " librarianSurname VARCHAR(40), "
-					+ " librarianPassword VARCHAR(20), "
-					+ " PRIMARY KEY(librarianId))"
+					+ " librarianId BIGINT,"
+					+ " librarianName VARCHAR(40),"
+					+ " librarianSurname VARCHAR(40),"
+					+ " librarianPassword VARCHAR(20),"
+					+ " PRIMARY KEY(librarianId)"
+					+ " );"
 					);
 			createLibrarians.executeUpdate();
 			System.out.println("Librarian table created");
 
-			PreparedStatement createBorrowings = con.prepareStatement("CREATE TABLE IF NOT EXISTS borrowings"
+			PreparedStatement createBorrow = con.prepareStatement("CREATE TABLE IF NOT EXISTS borrow"
 					+ "("
 					+ " userId BIGINT,"
 					+ " bookId INT,"
 					+ " borrowDate VARCHAR(30),"
 					+ " borrowTime VARCHAR(5),"
 					+ " returnDate VARCHAR(30),"
-					+ " PRIMARY KEY(borrowDate))"
+					+ " PRIMARY KEY(borrowDate)"
+					+ " );"
 					);
-			createBorrowings.executeUpdate();
-			System.out.println("Borrowings table created");
+			createBorrow.executeUpdate();
+			System.out.println("Borrow table created");
 
 		} catch (Exception e) {
 			System.out.println(e);
@@ -112,10 +113,20 @@ public class Database {
 		char[] password = librarian.getPassword();
 
 		try {
-			Connection con = getConnection("library");
+			Connection con = getConnection("library", Librarian.getCurrentLibrarian().getName(), Librarian.getCurrentLibrarian().getPassword());
 			PreparedStatement insert = con.prepareStatement("INSERT INTO librarians(librarianId, librarianName, librarianSurname, librarianPassword) VALUES ('"+id+"', '"+name+"', '"+surname+"', '"+Arrays.toString(password)+"')");
 			insert.executeUpdate();
 			System.out.println("Insert complete");
+
+			PreparedStatement createDBUser = con.prepareStatement("CREATE USER '" + name + "'@'localhost' IDENTIFIED BY '" + new String(password) + "';");
+			PreparedStatement grantTablePrivileges = con.prepareStatement("GRANT ALL PRIVILEGES ON library.* TO '" + name + "'@'localhost' WITH GRANT OPTION;" );
+			PreparedStatement grantUserPrivileges = con.prepareStatement("GRANT CREATE USER, RELOAD, DROP ROLE ON *.* TO '" + name + "'@'localhost' WITH GRANT OPTION;");
+			PreparedStatement solidifyPrivileges = con.prepareStatement("FLUSH PRIVILEGES;");
+			createDBUser.executeUpdate();
+			grantTablePrivileges.executeUpdate();
+			grantUserPrivileges.executeUpdate();
+			solidifyPrivileges.executeUpdate();
+			System.out.println("Database user created");
 
 		} catch (Exception e) {
 			System.out.println(e);
@@ -127,7 +138,7 @@ public class Database {
 	public static Librarian getLibrarian(int id) {
 
 		try {
-			Connection con = getConnection("library");
+			Connection con = getConnection("library", Librarian.getCurrentLibrarian().getName(), Librarian.getCurrentLibrarian().getPassword());
 			PreparedStatement get = con.prepareStatement("SELECT librarianId, librarianName, librarianSurname, librarianPassword FROM librarians");
 
 			ResultSet result = get.executeQuery();
@@ -148,12 +159,12 @@ public class Database {
 		System.out.println("No such librarian");
 		return null;
 	}
-	
-	
+
+
 	public static boolean isLibrarian(String name, String surname, int id, char[] password) {
 
 		try {
-			Connection con = getConnection("library");
+			Connection con = getConnection("library", Librarian.getCurrentLibrarian().getName(), Librarian.getCurrentLibrarian().getPassword());
 			PreparedStatement get = con.prepareStatement("SELECT librarianId, librarianName, librarianSurname, librarianPassword FROM librarians");
 
 			ResultSet result = get.executeQuery();
@@ -175,36 +186,38 @@ public class Database {
 			return false;
 		}
 	}
-	
+
 	public static Integer countLibrarians() {
-		
-		Connection con = getConnection("library");
-		
+
+		Connection con = getConnection("library", Librarian.getCurrentLibrarian().getName(), Librarian.getCurrentLibrarian().getPassword());
+
 		try {
 			PreparedStatement count = con.prepareStatement("SELECT COUNT(*) FROM librarians");
 			ResultSet result = count.executeQuery();
-			
+
 			int rowCount = 0;
-			
+
 			while(result.next()) {
 				rowCount = result.getInt("COUNT(*)");
 			}
 			return rowCount;
-			
+
 		} catch(Exception e) {
 			e.printStackTrace();
 			System.out.println("Could not count librarians");
 			return null;
 		}
 	}
-	
+
 	public static void deleteLibrarian(int id) {
-		
-		Connection con = getConnection("library");
-		
+
+		Connection con = getConnection("library", Librarian.getCurrentLibrarian().getName(), Librarian.getCurrentLibrarian().getPassword());
+
 		try {
-			PreparedStatement delete = con.prepareStatement("DELETE FROM librarians WHERE librarianId = '"+id+"'");
-			delete.executeUpdate();
+			PreparedStatement deleteFromTable = con.prepareStatement("DELETE FROM librarians WHERE librarianId = '"+id+"'");
+			PreparedStatement dropDefaultUser = con.prepareStatement("DROP USER '0'@'localhost';");
+			deleteFromTable.executeUpdate();
+			dropDefaultUser.executeUpdate();
 		} catch(Exception e) {
 			e.printStackTrace();
 			System.out.println("Couldn't delete a librarian");
@@ -222,8 +235,8 @@ public class Database {
 		boolean status = book.isBorrowed();
 
 		try {
-			Connection con = getConnection("library");
-			PreparedStatement insert = con.prepareStatement("INSERT INTO Books(bookId, bookName, bookAuthor, bookGenre, bookEdition, bookBorrowed) VALUES('"+bookId+"', '"+name+"', '"+author+"', '"+genre+"', '"+edition+"', '"+status+"')");
+			Connection con = getConnection("library", Librarian.getCurrentLibrarian().getName(), Librarian.getCurrentLibrarian().getPassword());
+			PreparedStatement insert = con.prepareStatement("INSERT INTO books(bookId, bookName, bookAuthor, bookGenre, bookEdition, bookBorrowed) VALUES('"+bookId+"', '"+name+"', '"+author+"', '"+genre+"', '"+edition+"', '"+status+"')");
 			insert.executeUpdate();
 			System.out.println("Insert complete");
 		} catch (Exception e) {
@@ -236,8 +249,8 @@ public class Database {
 	public static Book getBook(int id) {
 
 		try {
-			Connection con = getConnection("library");
-			PreparedStatement get = con.prepareStatement("SELECT bookId, bookName, bookAuthor, bookEdition, bookGenre, bookBorrowed FROM Books");
+			Connection con = getConnection("library", Librarian.getCurrentLibrarian().getName(), Librarian.getCurrentLibrarian().getPassword());
+			PreparedStatement get = con.prepareStatement("SELECT bookId, bookName, bookAuthor, bookEdition, bookGenre, bookBorrowed FROM books");
 
 			ResultSet result = get.executeQuery();
 
@@ -258,7 +271,7 @@ public class Database {
 	public static void bookStatusChange(int id, boolean changed) {
 
 		try {
-			Connection con = getConnection("library");
+			Connection con = getConnection("library", Librarian.getCurrentLibrarian().getName(), Librarian.getCurrentLibrarian().getPassword());
 			PreparedStatement change = con.prepareStatement("UPDATE books SET bookBorrowed = '"+changed+"' WHERE bookId = '"+id+"'");
 			change.executeUpdate();
 
@@ -268,12 +281,15 @@ public class Database {
 		}
 	}
 
-	public static void updateBook(int id, String title, String author, int edition, Genre genre) {
+	public static void updateBook(int id, String title, String author, int edition, Genre genre) throws Exception {
 
-		try {
-			Connection con = getConnection("library");
+	//	try {
+			Connection con = getConnection("library", Librarian.getCurrentLibrarian().getName(), Librarian.getCurrentLibrarian().getPassword());
 
 			Book book = Database.getBook(id);
+			if(book.isBorrowed() == true) {
+				throw new Exception("The book is borrowed and therefore its values cannot be changed until it is returned");
+			}
 
 			if(!book.getName().equals(title)) {
 				PreparedStatement updateTitle = con.prepareStatement("UPDATE books SET bookName = '"+title+"' WHERE bookId = '"+id+"'");
@@ -291,15 +307,16 @@ public class Database {
 				PreparedStatement updateEdition = con.prepareStatement("UPDATE books SET bookEdition = '"+edition+"' WHERE bookId = '"+id+"'");
 				updateEdition.executeUpdate();
 			}
-		} catch(Exception e) {
+	/*	} catch(Exception e) {
+			System.out.println(e);
 			e.printStackTrace();
-		}
+		}*/
 	}
 
 	public static String[][] fetchBooks() {
 
 		try {
-			Connection con = getConnection("library");
+			Connection con = getConnection("library", Librarian.getCurrentLibrarian().getName(), Librarian.getCurrentLibrarian().getPassword());
 			PreparedStatement fill = con.prepareStatement("SELECT bookId, bookName, bookAuthor, bookEdition, bookGenre, bookBorrowed FROM books");
 
 			ResultSet result = fill.executeQuery();
@@ -372,8 +389,8 @@ public class Database {
 		int userId = user.getId();
 
 		try {
-			Connection con = getConnection("library");
-			PreparedStatement insert = con.prepareStatement("INSERT INTO Users(userName, userSurname, userNoOfBooks, userId) VALUES('"+name+"', '"+surname+"', '"+noOfBooks+"', '"+userId+"')");
+			Connection con = getConnection("library", Librarian.getCurrentLibrarian().getName(), Librarian.getCurrentLibrarian().getPassword());
+			PreparedStatement insert = con.prepareStatement("INSERT INTO users(userName, userSurname, userNoOfBooks, userId) VALUES('"+name+"', '"+surname+"', '"+noOfBooks+"', '"+userId+"')");
 			insert.executeUpdate();
 			System.out.println("Insert complete");
 		} catch(Exception e) {
@@ -386,7 +403,7 @@ public class Database {
 	public static User getUser(int id) {
 
 		try {
-			Connection con = getConnection("library");
+			Connection con = getConnection("library", Librarian.getCurrentLibrarian().getName(), Librarian.getCurrentLibrarian().getPassword());
 			PreparedStatement get = con.prepareStatement("SELECT userId, userName, userSurname, userNoOfBooks FROM users");
 
 			ResultSet result = get.executeQuery();
@@ -406,11 +423,11 @@ public class Database {
 		System.out.println("No such librarian");
 		return null;
 	}
-	
-	
+
+
 	public static String[][] fetchUsers() {
-	
-	Connection con = getConnection("library");
+
+	Connection con = getConnection("library", Librarian.getCurrentLibrarian().getName(), Librarian.getCurrentLibrarian().getPassword());
 
 	try {
 		PreparedStatement getData = con.prepareStatement("SELECT userId, userName, userSurname, userNoOfBooks FROM users");
@@ -463,28 +480,28 @@ public class Database {
 			i++;
 		}
 		return data;
-		
+
 	} catch (SQLException e) {
 		System.out.println(e);
 		e.printStackTrace();
 	}
-	System.out.println("An error occured");
+	System.out.println("An error occurred");
 	return null;
 }
 
 	public static void updateUser(int id, String name, String surname) {
-		
-		Connection con = getConnection("library");
-		
+
+		Connection con = getConnection("library", Librarian.getCurrentLibrarian().getName(), Librarian.getCurrentLibrarian().getPassword());
+
 		try {
-			
+
 			User user = getUser(id);
-			
+
 			if(!user.getName().equals(name)) {
 				PreparedStatement updateTitle = con.prepareStatement("UPDATE users SET userName = '"+name+"' WHERE userId = '"+id+"'");
 				updateTitle.executeUpdate();
 			}
-			
+
 			if(!user.getSurname().equals(surname)) {
 			 	PreparedStatement updateAuthor = con.prepareStatement("UPDATE users SET userSurname = '"+surname+"' WHERE userId = '"+id+"'");
 			 	updateAuthor.executeUpdate();
@@ -494,8 +511,8 @@ public class Database {
 			System.out.println("Could not update the user");
 		}
 	}
-	
-	
+
+
 	//***BORROW METHODS***//
 	public static void insertBorrow(Borrow borrow) {
 
@@ -507,9 +524,9 @@ public class Database {
 		int newNoOfBooksSet = borrow.getUser().getNofBooks() + 1;
 
 		try {
-			Connection con = getConnection("library");
+			Connection con = getConnection("library", Librarian.getCurrentLibrarian().getName(), Librarian.getCurrentLibrarian().getPassword());
 
-			PreparedStatement insert = con.prepareStatement("INSERT INTO borrowings(userId, bookId, borrowDate, borrowTime, returnDate) VALUE('"+userId+"', '"+bookId+"', '"+borrowDate+"', '"+borrowTime+"', '"+returnDate+"')");
+			PreparedStatement insert = con.prepareStatement("INSERT INTO borrow(userId, bookId, borrowDate, borrowTime, returnDate) VALUE('"+userId+"', '"+bookId+"', '"+borrowDate+"', '"+borrowTime+"', '"+returnDate+"')");
 			insert.executeUpdate();
 
 			PreparedStatement addToUser = con.prepareStatement("UPDATE users SET userNoOfBooks = '"+newNoOfBooksSet+"' WHERE userId = '"+userId+"'");
@@ -527,8 +544,8 @@ public class Database {
 	public static Borrow getBorrow(User user, Book book) {
 
 		try {
-			Connection con = getConnection("library");
-			PreparedStatement get = con.prepareStatement("SELECT userId, bookId, borrowDate, returnDate, borrowTime FROM borrowings");
+			Connection con = getConnection("library", Librarian.getCurrentLibrarian().getName(), Librarian.getCurrentLibrarian().getPassword());
+			PreparedStatement get = con.prepareStatement("SELECT userId, bookId, borrowDate, returnDate, borrowTime FROM borrow");
 
 			ResultSet result = get.executeQuery();
 
@@ -552,8 +569,8 @@ public class Database {
 		int noOfBooksSet = Database.getUser(userId).getNofBooks() - 1;
 
 		try {
-			Connection con = getConnection("library");
-			PreparedStatement delete = con.prepareStatement("DELETE FROM borrowings WHERE bookId = '"+bookId+"' AND userId = '"+userId+"'");
+			Connection con = getConnection("library", Librarian.getCurrentLibrarian().getName(), Librarian.getCurrentLibrarian().getPassword());
+			PreparedStatement delete = con.prepareStatement("DELETE FROM borrow WHERE bookId = '"+bookId+"' AND userId = '"+userId+"'");
 			delete.executeUpdate();
 
 			PreparedStatement addToUser = con.prepareStatement("UPDATE users SET userNoOfBooks = '"+noOfBooksSet+"' WHERE userId = '"+userId+"'");
@@ -565,16 +582,16 @@ public class Database {
 		}
 	}
 
-	public static String[][] fetchBorrowings() {
+	public static String[][] fetchBorrow() {
 
-		Connection con = getConnection("library");
+		Connection con = getConnection("library", Librarian.getCurrentLibrarian().getName(), Librarian.getCurrentLibrarian().getPassword());
 
 		try {
-			PreparedStatement getData = con.prepareStatement("SELECT userId, bookId, returnDate FROM borrowings");
+			PreparedStatement getData = con.prepareStatement("SELECT userId, bookId, returnDate FROM borrow");
 
 			ResultSet result = getData.executeQuery();
 
-			PreparedStatement rowCounter = con.prepareStatement("SELECT COUNT(*) FROM borrowings");
+			PreparedStatement rowCounter = con.prepareStatement("SELECT COUNT(*) FROM borrow");
 			ResultSet rows = rowCounter.executeQuery();
 
 			int rowCount = 0;
@@ -644,12 +661,12 @@ public class Database {
 				i++;
 			}
 			return data;
-			
+
 		} catch (SQLException e) {
 			System.out.println(e);
 			e.printStackTrace();
 		}
-		System.out.println("An error occured");
+		System.out.println("An error occurred");
 		return null;
 	}
 }
