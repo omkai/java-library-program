@@ -1,23 +1,14 @@
 package hr.library.gui;
 
-import java.awt.BorderLayout;
-import java.awt.GridLayout;
+import hr.library.database.Database;
+import hr.library.users.User;
 
-import javax.swing.BorderFactory;
-import javax.swing.JButton;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
-import javax.swing.JTextField;
+import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
 import javax.swing.table.DefaultTableModel;
-
-import hr.library.database.Database;
-import hr.library.users.User;
+import java.awt.*;
 
 public class UserTab extends JPanel{
 
@@ -210,10 +201,10 @@ public class UserTab extends JPanel{
 		DefaultTableModel change = (DefaultTableModel) table.getModel();
 		
 		for(int i = 0; i < change.getRowCount(); i++) {
-			User toChange = new User((String)model.getValueAt(i, 1),
-					(String)model.getValueAt(i, 2),
-					Integer.parseInt((String)model.getValueAt(i, 3)),
-					Integer.parseInt((String)model.getValueAt(i, 0)));
+			User toChange = new User(model.getValueAt(i, 1).toString(),
+					model.getValueAt(i, 2).toString(),
+					Integer.parseInt(model.getValueAt(i, 3).toString()),
+					Integer.parseInt(model.getValueAt(i, 0).toString()));
 			if(user.equals(toChange) && add) {
 				model.setValueAt(String.valueOf(toChange.getNofBooks() + 1), i, 3);
 				break;
