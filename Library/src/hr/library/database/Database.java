@@ -6,6 +6,8 @@ import hr.library.borrow.Borrow;
 import hr.library.librarians.Librarian;
 import hr.library.users.User;
 
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
 import java.sql.*;
 
 public class Database {
@@ -81,7 +83,7 @@ public class Database {
 					+ " librarianId BIGINT,"
 					+ " librarianName VARCHAR(40),"
 					+ " librarianSurname VARCHAR(40),"
-					+ " librarianPassword VARCHAR(20),"
+					+ " librarianPassword CHAR(32),"
 					+ " PRIMARY KEY(librarianId)"
 					+ " );"
 					);
@@ -116,12 +118,15 @@ public class Database {
 		char[] password = librarian.getPassword();
 
 		try {
+			MessageDigest md = MessageDigest.getInstance("SHA-256");
+
 			Connection con = getConnection("library", Librarian.getCurrentLibrarian().getName(), Librarian.getCurrentLibrarian().getPassword());
+
 			PreparedStatement insert = con.prepareStatement("INSERT INTO librarians(librarianId, librarianName, librarianSurname, librarianPassword) VALUES (?, ?, ?, ?)");
 			insert.setInt(1, id);
 			insert.setString(2, name);
 			insert.setString(3, surname);
-			insert.setString(4, new String(password));
+			insert.setString(4, new String(md.digest(new String(password).getBytes(StandardCharsets.UTF_8))));
 			insert.executeUpdate();
 			System.out.println("Insert complete");
 
@@ -181,16 +186,23 @@ public class Database {
 	public static boolean isLibrarian(String name, String surname, int id, char[] password) {
 
 		try {
+			MessageDigest md = MessageDigest.getInstance("SHA-256");
+
 			Connection con = getConnection("library", Librarian.getCurrentLibrarian().getName(), Librarian.getCurrentLibrarian().getPassword());
-			PreparedStatement get = con.prepareStatement("SELECT librarianId, librarianName, librarianSurname, librarianPassword FROM librarians");
+			PreparedStatement get = con.prepareStatement("SELECT librarianId, librarianName, librarianSurname, librarianPassword FROM librarians WHERE librarianId = ?");
+			get.setInt(1, id);
 
 			ResultSet result = get.executeQuery();
 
+			String something = new String(md.digest(new String(password).getBytes(StandardCharsets.UTF_8)));
+
 			while(result.next()) {
+
+				String something2 = result.getString("librarianPassword");
 				if(result.getInt("librarianId") == id &&
 						result.getString("librarianName").equals(name) &&
 						result.getString("librarianSurname").equals(surname) &&
-						result.getString("librarianPassword").equals(new String(password))) {
+						result.getString("librarianPassword").equals(new String(md.digest(new String(password).getBytes(StandardCharsets.UTF_8))))) {
 					System.out.println("Librarian fetched");
 					return true;
 				}
